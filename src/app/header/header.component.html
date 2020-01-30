@@ -1,1 +1,12 @@
-<mat-toolbar color='default'> My Favorite App ! </mat-toolbar>
+<mat-toolbar color='primary'> 
+    <span> 
+        <a routerLink="/">Favorite App ! </a>
+    </span> 
+    <span class="spacer"></span>
+    <ul>
+        <li>
+            <a mat-button routerLink="/create" routerLinkActite="mat-accent">Create</a>
+        </li>
+    </ul>
+
+</mat-toolbar>
