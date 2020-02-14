@@ -28,20 +28,25 @@ const storage = multer.diskStorage({
 });
 
 router.post("", multer({storage: storage}).single("image") , (req,res,next)=>{
+    const url = req.protocol+ '://'+ req.get("host");
     const post = new Post({
       _id: req.body.id,
       title: req.body.title,
-      content: req.body.content
+      content: req.body.content,
+      imagePath: url + "/images/" + req.file.filename
     });
-  
+
     post.save().then(result => {
       res.status(201).json({
-        message: 'Post added successfully.', 
-        postId: result._id
-      });  
+        message: 'Post added successfully.',
+        post: {
+          ...createdPost,
+          id: createdPost.id
+        }
+      });
     });
 });
-  
+
 router.put("/:id",(req,res,next)=>{
     const post = new Post({
       _id: req.params.id,
@@ -53,7 +58,7 @@ router.put("/:id",(req,res,next)=>{
       res.status(200).json({message: 'Udate successfull.'});
     });
 });
-  
+
 router.delete("/:id",(req, res, next)=>{
     Post.deleteOne({_id: req.params.id}).then(result => {
       console.log(result);
@@ -61,9 +66,9 @@ router.delete("/:id",(req, res, next)=>{
         message: 'Deleted '+ req.params.id + ' successfully, well done!',
       });
     });
-  
+
   });
-  
+
 router.get("" ,(req, res, next)=>{
     Post.find()
       .then((documents) => {
@@ -76,7 +81,7 @@ router.get("" ,(req, res, next)=>{
          console.log("Error catch line:backendrouter.js 64: "+err);
       });
   });
-  
+
 router.get("/:id", (req,res,next)=>{
     Post.findById(req.params.id).then(post => {
       if(post){
@@ -86,5 +91,5 @@ router.get("/:id", (req,res,next)=>{
       }
     });
 });
-  
+
 module.exports = router;

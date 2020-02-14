@@ -21,7 +21,7 @@ export class PostsService {
     return this.http.get<{_id:string,title:string,content:string}>("http://localhost:3000/api/posts/" + id);
   }
 
-  getPosts() {  
+  getPosts() {
     this.http.get<{message: string; posts: any}>('http://localhost:3000/api/posts')
     .pipe(map(
       (postsData)=> {
@@ -29,7 +29,8 @@ export class PostsService {
           return {
             title: post.title,
             content: post.content,
-            id: post._id
+            id: post._id,
+            imagePath: post.imagePath
           };
         });
       }))
@@ -45,10 +46,15 @@ export class PostsService {
     postData.append("content",content);
     postData.append("image", image, title);
 
-    this.http.post<{message: string, postId: string}>('http://localhost:3000/api/posts',postData)
+    this.http.post<{message: string, post: Post}>('http://localhost:3000/api/posts',postData)
      .subscribe( responseData => {
-      const post: Post = {id: responseData.postId, title:title, content: content};
-      
+      const post: Post = {
+        id: responseData.post.id,
+        title:title,
+        content: content,
+        imagePath: responseData.post.imagePath
+      };
+
       this.posts.push(post);
       this.postsUpdated.next([...this.posts]);
       this.router.navigate(["/"]);
@@ -68,14 +74,14 @@ export class PostsService {
   }
 
   updatePost(postId:string, title: string, content: string){
-    const post: Post = {id: postId, title: title, content:content};
+    const post: Post = {id: postId, title: title, content:content, imagePath: null};
 
     this.http.put('http://localhost:3000/api/posts/' + postId,post)
       .subscribe(response => {
         console.log(response);
-        const updatedPosts = [...this.posts]; 
+        const updatedPosts = [...this.posts];
         const oldPostIndex = updatedPosts.findIndex(p => p.id === post.id);
-        
+
         updatedPosts[oldPostIndex] = post;
         this.posts = updatedPosts;
         this.postsUpdated.next([...this.posts]);
