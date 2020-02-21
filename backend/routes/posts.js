@@ -27,32 +27,45 @@ const storage = multer.diskStorage({
   }
 });
 
-router.post("", multer({storage: storage}).single("image") , (req,res,next)=>{
-    const url = req.protocol+ '://'+ req.get("host");
+router.post(
+  "",
+  multer({ storage: storage }).single("image"),
+  (req, res, next) => {
+    const url = req.protocol + "://" + req.get("host");
     const post = new Post({
-      _id: req.body.id,
       title: req.body.title,
       content: req.body.content,
       imagePath: url + "/images/" + req.file.filename
     });
-
-    post.save().then(result => {
+    post.save().then(createdPost => {
       res.status(201).json({
-        message: 'Post added successfully.',
+        message: "Post added successfully",
         post: {
           ...createdPost,
-          id: createdPost.id
+          id: createdPost._id
         }
       });
     });
-});
+  }
+);
 
-router.put("/:id",(req,res,next)=>{
+router.put("/:id",
+  multer({ storage: storage }).single("image"),
+  (req,res,next)=>{
+    let imagePath = req.body.imagePath;
+    if(req.file){
+      const url = req.protocol + "://" + req.get("host");
+      imagePath = url + "/images/" + req.file.filename;
+
+    }
+
     const post = new Post({
       _id: req.params.id,
       title:    req.body.title,
-      connect:  req.body.content
+      connect:  req.body.content,
+      imagePath: imagePath
     });
+    console.log(post);
     Post.findOneAndUpdate({_id: req.params.id}, post).then(result => {
       console.log(result);
       res.status(200).json({message: 'Udate successfull.'});
