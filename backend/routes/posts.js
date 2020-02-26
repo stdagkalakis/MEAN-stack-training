@@ -50,6 +50,9 @@ router.post(
           id: createdPost._id
         }
       });
+    })
+    .catch(err => {
+      res.status(500).json({message: "Creating a post failed."});
     });
   }
 );
@@ -79,6 +82,9 @@ router.put("/:id",checkAuth,
         res.status(401).json({message: 'Not authorised.'});      
       }
       
+    })
+    .catch(err => {
+      res.status(401).json({message: "Could not update post."});      
     });
 });
 
@@ -91,7 +97,9 @@ router.delete("/:id",checkAuth,(req, res, next)=>{
         res.status(401).json({message: 'Not authorised.'});
       }
       
-    });
+    }).catch((err)=>{
+      res.status(500).json({message: "Delete post failed."});
+   });
 
 });
 
@@ -120,7 +128,7 @@ router.get("" ,(req, res, next)=>{
         });
       })
       .catch((err)=>{
-         console.log("Error catch line:backendrouter.js 64: "+err);
+         res.status(500).json({message: "Fetching posts failed."});
       });
   });
 
@@ -131,7 +139,9 @@ router.get("/:id", (req,res,next)=>{
       }else{
         res.status(404).json({message: 'Post not foud'});
       }
-    });
+    }).catch((err)=>{
+      res.status(500).json({message: "Fetching post failed."});
+   });
 });
 
 module.exports = router;
