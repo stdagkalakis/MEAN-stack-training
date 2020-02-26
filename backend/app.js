@@ -9,7 +9,7 @@ const userRoutes = require('./routes/user');
 
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/node-angular',{useNewUrlParser: true, useUnifiedTopology: true}).then(()=>{
+mongoose.connect('mongodb://localhost:27017/node-angular',{useNewUrlParser: true, useUnifiedTopology: true,useFindAndModify: false}).then(()=>{
   console.log("Connected to database.");
 }).catch(()=>{
   console.log("Connection failed.");

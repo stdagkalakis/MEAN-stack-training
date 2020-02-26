@@ -18,12 +18,12 @@ export class PostsService {
 
   getPost(id: string){
     // return {...this.posts.find(p=> p.id === id)};
-    return this.http.get<{_id:string,title:string,content:string, imagePath: string}>("http://localhost:3000/api/posts/" + id);
+    return this.http.get<{_id:string,title:string,content:string, imagePath: string, creator:string}>("http://localhost:3000/api/posts/" + id);
   }
 
   getPosts(postsPerPage:number, currentPage: number) {
     const queryParams = `?pageSize=${postsPerPage}&page=${currentPage}`;
-    console.log("Get Posts : " + queryParams);
+    
     this.http
     .get<{message: string; posts: any, maxPosts: number}>("http://localhost:3000/api/posts"+queryParams)
     .pipe(map(
@@ -33,11 +33,13 @@ export class PostsService {
             title: post.title,
             content: post.content,
             id: post._id,
-            imagePath: post.imagePath
+            imagePath: post.imagePath,
+            creator: post.creator
           };
         }), maxPosts: postsData.maxPosts};
       }))
     .subscribe((transformedPostData)=> {
+      // console.log(transformedPostData);
       this.posts = transformedPostData.posts;
       this.postsUpdated.next({posts: [...this.posts], postCount: transformedPostData.maxPosts});
     });
@@ -51,7 +53,7 @@ export class PostsService {
 
     this.http.post<{message: string, post: Post}>('http://localhost:3000/api/posts',postData)
      .subscribe( responseData => {
-
+      console.log(responseData);
       this.router.navigate(["/"]);
     });
 
@@ -64,8 +66,10 @@ export class PostsService {
   }
 
   updatePost(postId:string, title: string, content: string, image: File | string){
-    // const post: Post = {id: postId, title: title, content:content, imagePath: null};
-    let postData: Post | FormData ;
+    
+    let postData: Post | FormData;
+
+    
     if(typeof(image)==='object'){
       postData = new FormData();
       postData.append("id",postId);
@@ -78,9 +82,11 @@ export class PostsService {
         id: postId,
         title: title,
         content: content,
-        imagePath: image
+        imagePath: image,
+        creator: null
       };
     }
+ 
     this.http.put('http://localhost:3000/api/posts/' + postId,postData)
       .subscribe(response => {
         this.router.navigate(["/"]);

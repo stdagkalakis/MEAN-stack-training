@@ -37,9 +37,12 @@ router.post(
     const post = new Post({
       title: req.body.title,
       content: req.body.content,
-      imagePath: url + "/images/" + req.file.filename
+      imagePath: url + "/images/" + req.file.filename,
+      creator: req.userData.userId
     });
+    
     post.save().then(createdPost => {
+      console.log(createdPost);
       res.status(201).json({
         message: "Post added successfully",
         post: {
@@ -58,28 +61,36 @@ router.put("/:id",checkAuth,
     if(req.file){
       const url = req.protocol + "://" + req.get("host");
       imagePath = url + "/images/" + req.file.filename;
-
     }
 
     const post = new Post({
       _id: req.params.id,
       title:    req.body.title,
-      connect:  req.body.content,
-      imagePath: imagePath
+      content:  req.body.content,
+      imagePath: imagePath,
+      creator: req.userData.userId
     });
-    console.log(post);
-    Post.findOneAndUpdate({_id: req.params.id}, post).then(result => {
+    
+    Post.findOneAndUpdate({_id: req.params.id, creator: req.userData.userId}, post).then(result => {
       console.log(result);
-      res.status(200).json({message: 'Udate successfull.'});
+      if(result) {
+        res.status(200).json({message: 'Udate successfull.'});
+      }else{
+        res.status(401).json({message: 'Not authorised.'});      
+      }
+      
     });
 });
 
 router.delete("/:id",checkAuth,(req, res, next)=>{
-    Post.deleteOne({_id: req.params.id}).then(result => {
-      console.log(result);
-      res.status(200).json({
-        message: 'Deleted '+ req.params.id + ' successfully, well done!',
-      });
+    Post.deleteOne({_id: req.params.id, creator: req.userData.userId}).then(result => {  
+      if(result.deletedCount > 0) {
+        console.log(result);
+        res.status(200).json({message: 'Deleted '+ req.params.id + ' successfully, well done!'});
+      }else {
+        res.status(401).json({message: 'Not authorised.'});
+      }
+      
     });
 
 });
